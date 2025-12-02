@@ -28,13 +28,13 @@ const Dashboard = () => {
         .filter((m) => m.tipo === "Ingreso")
         .reduce((acc, m) => acc + m.monto, 0);
     const totalGastos = movimientos
-        .filter((m) => m.tipo === "Gasto")
+        .filter((m) => m.tipo === "Egreso")
         .reduce((acc, m) => acc + m.monto, 0);
     const saldo = totalIngresos - totalGastos;
 
     // Datos para gráfico circular (solo gastos)
     const data = movimientos
-        .filter((m) => m.tipo === "Gasto")
+        .filter((m) => m.tipo === "Egreso")
         .reduce((acc, curr) => {
             const found = acc.find((item) => item.categoria === curr.descripcion);
             if (found) {

@@ -29,7 +29,7 @@ export default function Sidebar() {
             <div className="flex items-center justify-between p-4 border-b border-gray-200">
                 <div className="flex items-center gap-2">
                     <div className="rounded-md bg-yellow-400 w-8 h-8 flex items-center justify-center text-black font-bold">
-                        AL
+                        FN
                     </div>
                     {open && <span className="font-semibold text-lg text-gray-800">Bienvenidos</span>}
                 </div>
