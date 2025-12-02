@@ -72,7 +72,7 @@ const Dashboard = () => {
                         className="border px-3 py-2 rounded w-full sm:w-40"
                     >
                         <option>Ingreso</option>
-                        <option>Gasto</option>
+                        <option>Egreso</option>
                     </select>
                     <input
                         type="text"
@@ -161,7 +161,7 @@ const Dashboard = () => {
             <footer className="bg-white border-t border-gray-200 mt-12">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center text-sm text-gray-600">
                     <div>© 2025 Finanzas360</div>
-                    <div>Autores: Fatima Villamayor, Luis Sosa, Federico Maldonado</div>
+                    <div>Autores: Fatima Villamayor, Luis Sosa</div>
                 </div>
             </footer>
         </div>
