@@ -20,7 +20,7 @@ export default function Sidebar() {
 
   return (
     <aside
-      className={`flex flex-col ${
+      className={`flex flex-col h-screen ${
         open ? "w-64" : "w-16"
       } bg-athGrayLight border-r border-athGray transition-all duration-300`}
     >
@@ -29,7 +29,7 @@ export default function Sidebar() {
         <img
           src={Logo}
           alt="Logo Finanzas360"
-          className="w-12 h-12 object-contain"
+          className="w-10 h-10 object-contain"
         />
         {open && (
           <span className="ml-2 font-bold text-gray-800 text-lg">Finanzas360</span>
@@ -56,16 +56,16 @@ export default function Sidebar() {
         </button>
       </div>
 
-      {/* Menu */}
+      {/* Menú */}
       <nav className="flex-1 overflow-y-auto">
         <ul className="p-2 space-y-1">
           {menuItems.map((item) => (
-            <li key={item.path}>
+            <li key={item.path} className="flex justify-center">
               <NavLink
                 to={item.path}
-                end={item.path === "/"} // importante para la ruta raíz
+                end={item.path === "/"}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 w-full p-2 rounded-md transition-colors
+                  `flex items-center gap-3 w-full p-2 rounded-md transition-colors justify-center
                   ${
                     isActive
                       ? "bg-yellow-100 text-yellow-800 font-medium"
@@ -73,7 +73,7 @@ export default function Sidebar() {
                   }`
                 }
               >
-                <span className="flex-shrink-0">{item.icon}</span>
+                <span>{item.icon}</span>
                 {open && <span className="truncate">{item.title}</span>}
               </NavLink>
             </li>
@@ -92,3 +92,4 @@ export default function Sidebar() {
     </aside>
   );
 }
+
