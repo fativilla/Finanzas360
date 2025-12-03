@@ -22,7 +22,7 @@ export default function Sidebar() {
     <aside
       className={`flex flex-col h-screen ${
         open ? "w-64" : "w-16"
-      } bg-athGrayLight border-r border-athGray transition-all duration-300`}
+      } bg-athGrayLight border-r border-gray-200 transition-all duration-300`}
     >
       {/* Logo */}
       <div className="flex items-center justify-center p-4">
