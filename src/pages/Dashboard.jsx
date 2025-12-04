@@ -94,16 +94,6 @@ const Dashboard = () => {
         });
     };
 
-    // Función para formato compacto (100.000 → 100k)
-    const compactFormat = (value) => {
-        return new Intl.NumberFormat("es-PY", {
-            notation: "compact",
-            compactDisplay: "short",
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0
-        }).format(value);
-    };
-
     // Formatear fecha
     const formatDate = (date) => {
         return new Date(date).toLocaleDateString("es-ES", {
@@ -117,12 +107,12 @@ const Dashboard = () => {
     const { daysInMonth, startingDay } = getDaysInMonth(currentMonth);
     const days = [];
 
-    // Días del mes anterior (vacíos)
+    // Días del mes anterior
     for (let i = 0; i < startingDay; i++) {
         days.push(<div key={`empty-${i}`} className="h-12 bg-gray-50 rounded-lg"></div>);
     }
 
-    // Días del mes actual
+    // Días del mes actual con puntos indicador de ingresos y gastos
     for (let day = 1; day <= daysInMonth; day++) {
         const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
         const isToday = date.toDateString() === new Date().toDateString();
@@ -131,8 +121,8 @@ const Dashboard = () => {
             const moveDate = new Date(m.fecha);
             return moveDate.toDateString() === date.toDateString();
         });
-        const dayIncome = dayMovements.filter(m => m.tipo === "Ingreso").reduce((a, b) => a + b.monto, 0);
-        const dayExpense = dayMovements.filter(m => m.tipo === "Egreso").reduce((a, b) => a + b.monto, 0);
+        const hasIncome = dayMovements.some(m => m.tipo === "Ingreso");
+        const hasExpense = dayMovements.some(m => m.tipo === "Egreso");
 
         days.push(
             <button
@@ -148,16 +138,12 @@ const Dashboard = () => {
                 <span className={`font-semibold ${isToday ? 'text-yellow-600' : 'text-gray-700'}`}>
                     {day}
                 </span>
-                <div className="flex flex-col items-center justify-center gap-[1px] mt-1 max-w-full overflow-hidden">
-                    {dayIncome > 0 && (
-                        <span className="text-[10px] text-green-600 font-medium truncate max-w-full">
-                            +{compactFormat(dayIncome)}
-                        </span>
+                <div className="flex gap-1 mt-1">
+                    {hasIncome && (
+                        <span className="w-3 h-3 rounded-full bg-green-500 block" title="Ingreso"></span>
                     )}
-                    {dayExpense > 0 && (
-                        <span className="text-[10px] text-red-600 font-medium truncate max-w-full">
-                            -{compactFormat(dayExpense)}
-                        </span>
+                    {hasExpense && (
+                        <span className="w-3 h-3 rounded-full bg-red-500 block" title="Gasto"></span>
                     )}
                 </div>
             </button>
@@ -380,24 +366,27 @@ const Dashboard = () => {
                                             </tr>
                                         ) : (
                                             movimientos.map((m) => (
-                                                <tr key={m.id} className="hover:bg-gray-50">
-                                                    <td className={`px-6 py-3 font-semibold ${m.tipo === "Ingreso" ? "text-green-600" : "text-red-600"}`}>
-                                                        {m.tipo}
+                                                <tr key={m.id} className="hover:bg-gray-50 transition-colors">
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${m.tipo === "Ingreso" ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                                            {m.tipo === "Ingreso" ? (
+                                                                <TrendingUp className="w-4 h-4 mr-1" />
+                                                            ) : (
+                                                                <TrendingDown className="w-4 h-4 mr-1" />
+                                                            )}
+                                                            {m.tipo}
+                                                        </span>
                                                     </td>
-                                                    <td className="px-6 py-3 text-gray-700">
-                                                        {new Date(m.fecha).toLocaleDateString("es-PY")}
-                                                    </td>
-                                                    <td className="px-6 py-3 text-gray-700 truncate max-w-xs">
-                                                        {m.descripcion}
-                                                    </td>
-                                                    <td className={`px-6 py-3 font-semibold ${m.tipo === "Ingreso" ? "text-green-600" : "text-red-600"}`}>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-gray-600">{new Date(m.fecha).toLocaleDateString("es-ES")}</td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-gray-800">{m.descripcion}</td>
+                                                    <td className={`px-6 py-4 whitespace-nowrap font-semibold ${m.tipo === "Ingreso" ? "text-green-700" : "text-red-700"}`}>
                                                         {formatCurrency(m.monto)}
                                                     </td>
-                                                    <td className="px-6 py-3">
+                                                    <td className="px-6 py-4 whitespace-nowrap">
                                                         <button
                                                             onClick={() => eliminarMovimiento(m.id)}
-                                                            className="text-red-500 hover:text-red-700 transition-colors"
-                                                            aria-label="Eliminar movimiento"
+                                                            className="text-red-600 hover:text-red-800 transition-colors"
+                                                            title="Eliminar"
                                                         >
                                                             <X className="w-5 h-5" />
                                                         </button>
@@ -411,75 +400,79 @@ const Dashboard = () => {
                         </div>
                     </div>
 
-                    {/* Sección Derecha - Calendario y Gráficos */}
+                    {/* Sección Derecha - Calendario y Gráfico */}
                     <div className="space-y-6">
-                        {/* Calendario Mejorado */}
+                        {/* Calendario */}
                         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                            <div className="flex justify-between items-center mb-4">
+                            <div className="flex items-center justify-between mb-4">
                                 <button
                                     onClick={prevMonth}
                                     className="p-2 rounded-full hover:bg-yellow-100 transition-colors"
-                                    aria-label="Mes anterior"
+                                    title="Mes anterior"
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                                    </svg>
+                                    <ChevronLeft className="w-5 h-5 text-yellow-500" />
                                 </button>
-                                <h3 className="text-lg font-semibold text-gray-700">
-                                    {currentMonth.toLocaleDateString("es-ES", { month: "long", year: "numeric" })}
+                                <h3 className="text-lg font-bold text-gray-800">
+                                    {currentMonth.toLocaleDateString("es-ES", { year: "numeric", month: "long" })}
                                 </h3>
                                 <button
                                     onClick={nextMonth}
                                     className="p-2 rounded-full hover:bg-yellow-100 transition-colors"
-                                    aria-label="Mes siguiente"
+                                    title="Mes siguiente"
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                    </svg>
+                                    <ChevronRight className="w-5 h-5 text-yellow-500" />
                                 </button>
                             </div>
 
                             {/* Días de la semana */}
-                            <div className="grid grid-cols-7 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide select-none mb-1">
-                                {["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"].map((d) => (
-                                    <div key={d} className="py-1">{d}</div>
-                                ))}
+                            <div className="grid grid-cols-7 text-center text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
+                                <div>Dom</div>
+                                <div>Lun</div>
+                                <div>Mar</div>
+                                <div>Mié</div>
+                                <div>Jue</div>
+                                <div>Vie</div>
+                                <div>Sáb</div>
                             </div>
 
-                            {/* Días del mes */}
-                            <div className="grid grid-cols-7 gap-1">
+                            {/* Días */}
+                            <div className="grid grid-cols-7 gap-2">
                                 {days}
                             </div>
-                        </div>
 
-                        {/* Detalles de Movimientos del Día Seleccionado */}
-                        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 max-h-[320px] overflow-y-auto">
-                            <h3 className="text-lg font-semibold text-gray-700 mb-4">
-                                Movimientos del {formatDate(selectedDate)}
-                            </h3>
-                            {selectedDayMovements.length === 0 ? (
-                                <p className="text-gray-500 text-sm">No hay movimientos registrados para este día.</p>
-                            ) : (
-                                <ul className="divide-y divide-gray-200">
-                                    {selectedDayMovements.map(m => (
-                                        <li key={m.id} className="py-2 flex justify-between items-center">
-                                            <div>
-                                                <p className="font-semibold text-gray-700">{m.descripcion}</p>
-                                                <p className={`text-sm ${m.tipo === "Ingreso" ? "text-green-600" : "text-red-600"}`}>
-                                                    {m.tipo}
-                                                </p>
-                                            </div>
-                                            <p className={`font-semibold ${m.tipo === "Ingreso" ? "text-green-600" : "text-red-600"}`}>
-                                                {formatCurrency(m.monto)}
-                                            </p>
-                                        </li>
-                                    ))}
-                                </ul>
-                            )}
+                            {/* Movimientos del día seleccionado */}
+                            <div className="mt-4">
+                                <h4 className="text-sm font-semibold text-gray-700 mb-2">
+                                    Movimientos del {formatDate(selectedDate)}
+                                </h4>
+                                {selectedDayMovements.length === 0 ? (
+                                    <p className="text-gray-500 text-sm">No hay movimientos para este día.</p>
+                                ) : (
+                                    <ul className="space-y-1 max-h-48 overflow-y-auto">
+                                        {selectedDayMovements.map(m => (
+                                            <li
+                                                key={m.id}
+                                                className={`flex justify-between text-sm font-medium px-3 py-1 rounded-lg
+                                                    ${m.tipo === "Ingreso" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}
+                                                `}
+                                            >
+                                                <span>{m.descripcion}</span>
+                                                <span>{formatCurrency(m.monto)}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )}
+                            </div>
                         </div>
 
                         {/* Gráfico de Gastos por Rubro */}
-                        <GastoPorRubro data={data} />
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                            <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                                <PieChart className="w-5 h-5 text-yellow-500" />
+                                Gastos por Rubro
+                            </h3>
+                            <GastoPorRubro data={data} />
+                        </div>
                     </div>
                 </div>
             </div>
