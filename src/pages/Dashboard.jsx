@@ -1,3 +1,4 @@
+
 // Principal.jsx
 import React, { useState, useEffect } from "react";
 import Logo from "../assets/logo.png";
@@ -93,6 +94,16 @@ const Dashboard = () => {
         });
     };
 
+    // Función para formato compacto (100.000 → 100k)
+    const compactFormat = (value) => {
+        return new Intl.NumberFormat("es-PY", {
+            notation: "compact",
+            compactDisplay: "short",
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        }).format(value);
+    };
+
     // Formatear fecha
     const formatDate = (date) => {
         return new Date(date).toLocaleDateString("es-ES", {
@@ -106,7 +117,7 @@ const Dashboard = () => {
     const { daysInMonth, startingDay } = getDaysInMonth(currentMonth);
     const days = [];
 
-    // Días del mes anterior
+    // Días del mes anterior (vacíos)
     for (let i = 0; i < startingDay; i++) {
         days.push(<div key={`empty-${i}`} className="h-12 bg-gray-50 rounded-lg"></div>);
     }
@@ -137,12 +148,16 @@ const Dashboard = () => {
                 <span className={`font-semibold ${isToday ? 'text-yellow-600' : 'text-gray-700'}`}>
                     {day}
                 </span>
-                <div className="flex gap-1 mt-1">
+                <div className="flex flex-col items-center justify-center gap-[1px] mt-1 max-w-full overflow-hidden">
                     {dayIncome > 0 && (
-                        <span className="text-xs text-green-500">+{formatCurrency(dayIncome)}</span>
+                        <span className="text-[10px] text-green-600 font-medium truncate max-w-full">
+                            +{compactFormat(dayIncome)}
+                        </span>
                     )}
                     {dayExpense > 0 && (
-                        <span className="text-xs text-red-500">-{formatCurrency(dayExpense)}</span>
+                        <span className="text-[10px] text-red-600 font-medium truncate max-w-full">
+                            -{compactFormat(dayExpense)}
+                        </span>
                     )}
                 </div>
             </button>
@@ -365,33 +380,24 @@ const Dashboard = () => {
                                             </tr>
                                         ) : (
                                             movimientos.map((m) => (
-                                                <tr key={m.id} className="hover:bg-gray-50 transition-colors">
-                                                    <td className="px-6 py-4 whitespace-nowrap">
-                                                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${m.tipo === "Ingreso" ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                                                            {m.tipo === "Ingreso" ? (
-                                                                <TrendingUp className="w-4 h-4 mr-1" />
-                                                            ) : (
-                                                                <TrendingDown className="w-4 h-4 mr-1" />
-                                                            )}
-                                                            {m.tipo}
-                                                        </span>
+                                                <tr key={m.id} className="hover:bg-gray-50">
+                                                    <td className={`px-6 py-3 font-semibold ${m.tipo === "Ingreso" ? "text-green-600" : "text-red-600"}`}>
+                                                        {m.tipo}
                                                     </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-gray-600">
-                                                        {new Date(m.fecha).toLocaleDateString('es-PY')}
+                                                    <td className="px-6 py-3 text-gray-700">
+                                                        {new Date(m.fecha).toLocaleDateString("es-PY")}
                                                     </td>
-                                                    <td className="px-6 py-4">
-                                                        <div className="text-gray-800 font-medium">{m.descripcion}</div>
+                                                    <td className="px-6 py-3 text-gray-700 truncate max-w-xs">
+                                                        {m.descripcion}
                                                     </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap">
-                                                        <span className={`text-lg font-bold ${m.tipo === "Ingreso" ? 'text-green-600' : 'text-red-600'}`}>
-                                                            {m.tipo === "Ingreso" ? '+' : '-'}{formatCurrency(m.monto)}
-                                                        </span>
+                                                    <td className={`px-6 py-3 font-semibold ${m.tipo === "Ingreso" ? "text-green-600" : "text-red-600"}`}>
+                                                        {formatCurrency(m.monto)}
                                                     </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                    <td className="px-6 py-3">
                                                         <button
                                                             onClick={() => eliminarMovimiento(m.id)}
-                                                            className="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded-lg transition-colors"
-                                                            title="Eliminar movimiento"
+                                                            className="text-red-500 hover:text-red-700 transition-colors"
+                                                            aria-label="Eliminar movimiento"
                                                         >
                                                             <X className="w-5 h-5" />
                                                         </button>
@@ -402,144 +408,81 @@ const Dashboard = () => {
                                     </tbody>
                                 </table>
                             </div>
-                            
-                            {movimientos.length > 0 && (
-                                <div className="bg-gray-50 border-t border-gray-200 px-6 py-4">
-                                    <div className="flex justify-between items-center">
-                                        <div className="text-gray-600">
-                                            <span className="font-medium">Ingresos:</span> {formatCurrency(totalIngresos)} | 
-                                            <span className="font-medium ml-4">Gastos:</span> {formatCurrency(totalGastos)} | 
-                                            <span className="font-medium ml-4">Saldo:</span> {formatCurrency(saldo)}
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
                         </div>
                     </div>
 
-                    {/* Sección Derecha - Calendario y Gráfico */}
+                    {/* Sección Derecha - Calendario y Gráficos */}
                     <div className="space-y-6">
-                        {/* Calendario */}
+                        {/* Calendario Mejorado */}
                         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                            <div className="flex items-center justify-between mb-4">
-                                <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                                    <Calendar className="w-5 h-5 text-yellow-500" />
-                                    Calendario
+                            <div className="flex justify-between items-center mb-4">
+                                <button
+                                    onClick={prevMonth}
+                                    className="p-2 rounded-full hover:bg-yellow-100 transition-colors"
+                                    aria-label="Mes anterior"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                    </svg>
+                                </button>
+                                <h3 className="text-lg font-semibold text-gray-700">
+                                    {currentMonth.toLocaleDateString("es-ES", { month: "long", year: "numeric" })}
                                 </h3>
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={prevMonth}
-                                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                                    >
-                                        ◀
-                                    </button>
-                                    <span className="font-semibold text-gray-700">
-                                        {currentMonth.toLocaleDateString('es-PY', { month: 'long', year: 'numeric' })}
-                                    </span>
-                                    <button
-                                        onClick={nextMonth}
-                                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                                    >
-                                        ▶
-                                    </button>
-                                </div>
+                                <button
+                                    onClick={nextMonth}
+                                    className="p-2 rounded-full hover:bg-yellow-100 transition-colors"
+                                    aria-label="Mes siguiente"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
                             </div>
-                            
+
                             {/* Días de la semana */}
-                            <div className="grid grid-cols-7 gap-1 mb-2">
-                                {['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'].map(day => (
-                                    <div key={day} className="text-center text-sm font-medium text-gray-500 py-1">
-                                        {day}
-                                    </div>
+                            <div className="grid grid-cols-7 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide select-none mb-1">
+                                {["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"].map((d) => (
+                                    <div key={d} className="py-1">{d}</div>
                                 ))}
                             </div>
-                            
+
                             {/* Días del mes */}
                             <div className="grid grid-cols-7 gap-1">
                                 {days}
                             </div>
-                            
-                            {/* Movimientos del día seleccionado */}
-                            {selectedDayMovements.length > 0 && (
-                                <div className="mt-6 pt-4 border-t border-gray-200">
-                                    <h4 className="font-medium text-gray-700 mb-2">
-                                        Movimientos del {selectedDate.toLocaleDateString('es-PY')}
-                                    </h4>
-                                    <div className="space-y-2">
-                                        {selectedDayMovements.map(m => (
-                                            <div key={m.id} className="flex items-center justify-between text-sm p-2 hover:bg-gray-50 rounded">
-                                                <span className="text-gray-700">{m.descripcion}</span>
-                                                <span className={`font-medium ${m.tipo === "Ingreso" ? 'text-green-600' : 'text-red-600'}`}>
-                                                    {m.tipo === "Ingreso" ? '+' : '-'}{formatCurrency(m.monto)}
-                                                </span>
+                        </div>
+
+                        {/* Detalles de Movimientos del Día Seleccionado */}
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 max-h-[320px] overflow-y-auto">
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4">
+                                Movimientos del {formatDate(selectedDate)}
+                            </h3>
+                            {selectedDayMovements.length === 0 ? (
+                                <p className="text-gray-500 text-sm">No hay movimientos registrados para este día.</p>
+                            ) : (
+                                <ul className="divide-y divide-gray-200">
+                                    {selectedDayMovements.map(m => (
+                                        <li key={m.id} className="py-2 flex justify-between items-center">
+                                            <div>
+                                                <p className="font-semibold text-gray-700">{m.descripcion}</p>
+                                                <p className={`text-sm ${m.tipo === "Ingreso" ? "text-green-600" : "text-red-600"}`}>
+                                                    {m.tipo}
+                                                </p>
                                             </div>
-                                        ))}
-                                    </div>
-                                </div>
+                                            <p className={`font-semibold ${m.tipo === "Ingreso" ? "text-green-600" : "text-red-600"}`}>
+                                                {formatCurrency(m.monto)}
+                                            </p>
+                                        </li>
+                                    ))}
+                                </ul>
                             )}
                         </div>
 
-                        {/* Gráfico Circular */}
-                        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                            <div className="flex items-center justify-between mb-4">
-                                <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                                    <PieChart className="w-5 h-5 text-yellow-500" />
-                                    Distribución de Gastos
-                                </h3>
-                                {data.length > 0 && (
-                                    <span className="text-sm text-gray-500">
-                                        {data.length} categorías
-                                    </span>
-                                )}
-                            </div>
-                            
-                            {data.length > 0 ? (
-                                <GastoPorRubro data={data} />
-                            ) : (
-                                <div className="text-center py-8">
-                                    <PieChart className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                                    <p className="text-gray-500">No hay datos de gastos para mostrar</p>
-                                    <p className="text-sm text-gray-400">Registra algunos gastos para ver el gráfico</p>
-                                </div>
-                            )}
-                            
-                            {data.length > 0 && (
-                                <div className="mt-4 pt-4 border-t border-gray-200">
-                                    <div className="text-sm text-gray-600">
-                                        <span className="font-medium">Total gastos:</span> {formatCurrency(totalGastos)}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
+                        {/* Gráfico de Gastos por Rubro */}
+                        <GastoPorRubro data={data} />
                     </div>
                 </div>
             </div>
-
-            {/* Footer */}
-            <footer className="bg-white border-t border-gray-200 mt-12">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-                        <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-lg flex items-center justify-center">
-                                <DollarSign className="w-4 h-4 text-white" />
-                            </div>
-                            <div>
-                                <p className="font-semibold text-gray-800">© 2025 Finanzas360</p>
-                                <p className="text-sm text-gray-600">Sistema de Gestión Financiera</p>
-                            </div>
-                        </div>
-                        
-                        <div className="flex items-center gap-2 text-gray-600">
-                            <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
-                            <span>Autores: Fatima Villamayor, Luis Sosa</span>
-                        </div>
-                        
-                        <div className="text-sm text-gray-500">
-                            Última actualización: {currentTime.toLocaleTimeString('es-PY', { hour: '2-digit', minute: '2-digit' })}
-                        </div>
-                    </div>
-                </div>
-            </footer>
         </div>
     );
 };
