@@ -81,7 +81,6 @@ Fátima Villamayor
 
 Luis Sosa
 
-Federico Maldonado
 
 📜 Licencia
 
