@@ -85,3 +85,4 @@ Luis Sosa
 📜 Licencia
 
 Este proyecto es educativo y de práctica para el curso de JavaScript con React
+publicado en: https://finanzas360.onrender.com/
