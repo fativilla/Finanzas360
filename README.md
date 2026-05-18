@@ -81,6 +81,9 @@ Fátima Villamayor
 
 Luis Sosa
 
+<img width="1666" height="1131" alt="image" src="https://github.com/user-attachments/assets/71e21a03-e7b0-4b50-87a3-0f38a48667c4" />
+
+
 
 📜 Licencia
 
